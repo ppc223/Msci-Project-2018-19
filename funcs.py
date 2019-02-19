@@ -97,7 +97,11 @@ def catstate(alpha, phi, theta, N):
     K = 1 + np.sin(2 * phi) * np.cos(theta) * np.exp(-2 * alpha * np.conj(alpha))
     norm = 1/np.sqrt(K)
 
-    return norm * (coh1 + coh2)
+    # Calculate state and its expectation value for the number operator
+    output = norm * (coh1 + coh2)
+    nmean = expect(num(N), output)
+
+    return output, nmean
 
 
 def cubic(gamma, sqzf, N):
@@ -115,10 +119,11 @@ def cubic(gamma, sqzf, N):
     cubeop = (1j * gamma * (x ** 3)).expm()
     sqop = (-(1j * sqzf / 2) * (x * p + p * x)).expm()
 
-    # Calculate the state by operating on the vacuum
+    # Calculate state and its expectation value for the number operator
     cubic = cubeop * sqop * basis(N,0)
+    nmean = expect(num(N), cubic)
 
-    return cubic
+    return cubic, nmean
 
 
 def innercubic(gamma, sqzf, N):
@@ -140,9 +145,11 @@ def innercubic(gamma, sqzf, N):
     cubeop = (1j * gamma * exponent).expm()
     sqop = (-(1j * sqzf / 2) * (x * p + p * x)).expm()
 
-    icubic = cubeop * sqop * basis(N,0)
+    # Calculate state and its expectation value for the number operator
+    cubic = cubeop * sqop * basis(N,0)
+    nmean = expect(num(N), cubic)
 
-    return icubic
+    return cubic, nmean
 
 
 def wigcubic(gamma, r, X, P):
@@ -175,13 +182,18 @@ def superposition(coeff):
     :coeff: List of coefficients, (preferably normalised), number of coefficents
     determines number of fock states in the Hilbert space
     """
+    # Calculate size of space
     N = len(coeff) + 1
     state = coeff[0] * basis(N,0)
 
+    # Generate Superposition
     for i, x in enumerate(coeff[1:]):
         state = state + x * fock(N,i)
 
-    return state
+    # Calculate expectation value for the number operator
+    expect(num(N), state)
+
+    return state, nmean
 
 # Calculation Functions:
 
