@@ -356,7 +356,7 @@ def wln(state, tol, xcount=400, ycount=400, initx=[-3, 3], inity=[-3, 3],
     calctimeend = time.time()
     calctime = calctimeend - calctimestart
 
-    return WLN, Wnorm, boundtime, calctime
+    return WLN, Wnorm, boundtime, calctime, xbound, ybound
 
 
 def wlnanalytic(gamma, r, tol,  xcount=800, ycount=800, initx=[-3, 3],
@@ -385,4 +385,4 @@ def wlnanalytic(gamma, r, tol,  xcount=800, ycount=800, initx=[-3, 3],
     # Calculate the normalisation of and WLN of the state
     Wnorm = simps2d(xvec, yvec, W)
     WLN = np.log2(simps2d(xvec, yvec, np.abs(W)))
-    return WLN, Wnorm
+    return WLN, Wnorm, xbound, ybound
