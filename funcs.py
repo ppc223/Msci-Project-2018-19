@@ -7,10 +7,13 @@ from scipy.special import airy
 from matplotlib import cm
 from qutip import *
 
-def myplotwigner(psi, xrange = [0,3], yrange = [-20,20], step = 0.1, title = 'Wigner Function'):
+
+# Plotting Functions:
+
+def myplotwigner(psi, xrange = [0,3], yrange = [-20,20], step = 0.1, title = 'A Wigner Function'):
     """
     Function for plotting the Wiger function of a state which gives more control
-    over the appearance of the graph than the built in qutip plot_wigner function
+    over the appearance of the graph than the built in qutip plot_wigner function.
     """
     # Generate X and Y values from inputs
     xvec = np.arange(xrange[0], xrange[1], step)
@@ -33,15 +36,19 @@ def myplotwigner(psi, xrange = [0,3], yrange = [-20,20], step = 0.1, title = 'Wi
     ax.contour(X, Y, W, 20,zdir='z', offset=float(W.max() / 10))
     
     # Label Axes appropriately
-    ax.set_xlabel(r'$\rm{Re}(\alpha) / x$')
-    ax.set_ylabel(r'$\rm{Im}(\alpha) / p$')
-    ax.set_zlabel(r'$W(\alpha)$')
+    ax.set_xlabel(r'$\rm{Re}(\alpha) \ / \ x$')
+    ax.set_ylabel(r'$\rm{Im}(\alpha) \ / \ p$')
+    ax.set_zlabel(r'$W_{\rho}(\alpha)$')
     
     # Add title
     plt.title(title)
     return fig, ax
 
-def my3dplot(X, Y, Z, title = 'Wigner Function'):
+
+def my3dplot(X, Y, Z, title, axeslabels=['x','y','z'], fineness = 50, cmap = cm.jet):
+    """
+    Function to plot an easily readable 3d visual of a set of input points.
+    """
     x0 = X[0]
     y0 = Y[0]
     # Generate X and Y values from inputs
@@ -52,7 +59,7 @@ def my3dplot(X, Y, Z, title = 'Wigner Function'):
     ax = Axes3D(fig) 
     
     # plot surface
-    ax.plot_surface(X, Y, Z, rcount= 50, ccount= 50, cmap=cm.jet, alpha=.8)
+    ax.plot_surface(X, Y, Z, rcount= fineness, ccount= fineness, cmap=cm.jet, alpha=.8)
     
     # Overlay contours onto plot
     ax.contour(X, Y, Z, 10, zdir='x', offset=x0)
@@ -60,52 +67,235 @@ def my3dplot(X, Y, Z, title = 'Wigner Function'):
     ax.contour(X, Y, Z, 20,zdir='z', offset=0)
     
     # Label Axes appropriately
-    ax.set_xlabel(r'$\rm{Re}(\alpha) / x$')
-    ax.set_ylabel(r'$\rm{Im}(\alpha) / p$')
-    ax.set_zlabel(r'$W(\alpha)$')
+    ax.set_xlabel(axeslabels[0])
+    ax.set_ylabel(axeslabels[1])
+    ax.set_zlabel(axeslabels[2])
     
     # Add title
     plt.title(title)
+    
     return fig, ax
+
+# Calculation Functions:
+
+def boundfindwig(state, tol, initx = [-1, 1], inity = [-1, 1], incre = 0.5, maxdepth = 30):
+    """
+    Rudimentary function for automatically finding bounds for a states wigner function
+    by looking at the value of the function along the edges of a grid and extending 
+    the grid until the values at the edges become below a tolerance.
+    :state: The Qobj State vector/density matrix of a state
+    :tol: Value considered negligible
+    :initx/y: Inital x and y bounds
+    :incre: Amount to change bounds by when point above tol found, also
+    serves as spacing between points calculated along edges
+    :maxdepth: maximum times to increase bounds before determining to stop
+    """
+    # Create x and p vectors
+    xvec = np.arange(initx[0], initx[1], step = incre)
+    yvec = np.arange(inity[0], inity[1], step = incre)
+    
+    # Initialise depth parameters
+    d1 = 0
+    d2 = 0
+    
+    # Need to re-evaluate if either vector is altered 
+    changed = True
+    while changed:
+        changed = False
+
+        if d1 > maxdepth:
+            raise StopIteration('Max Depth reached, try increasing N or max depth')
+
+        if d2 > maxdepth:
+            raise StopIteration('Max Depth reached, try increasing N or max depth')
+
+        if (np.abs(wigner(state, xvec, yvec[0])) > tol).any():
+            yvec = np.insert(yvec, 0, yvec[0] - incre)
+            d1 = d1 + 1
+            changed = True
+
+        if (np.abs(wigner(state, xvec, yvec[-1])) > tol).any():
+            yvec = np.append(yvec, yvec[-1] + incre)
+            d1 = d1 + 1
+            changed = True
+
+
+        if (np.abs(wigner(state, xvec[0], yvec)) > tol).any():
+            xvec = np.insert(xvec, 0, xvec[0] - incre)
+            d2 = d2 + 1
+            changed = True
+
+        if (np.abs(wigner(state, xvec[-1], yvec)) > tol).any():
+            xvec = np.append(xvec, xvec[-1] + incre)
+            d2 = d2 + 1
+            changed = True
+
+
+    return [xvec[0], xvec[-1] + incre], [yvec[0], yvec[-1] + incre]
+
+
+def boundfindcube(func, tol, initx = [-1, 1], inity = [-1, 1], incre = 0.5, maxdepth = 30, args=()):
+    """
+    Rudimentary function for automatically finding bounds for a states wigner function
+    by looking at the value of the function along the edges of a grid and extending 
+    the grid until the values at the edges become below a tolerance.
+    :func: Analytical function for a states Wigner function
+    :tol: Value considered negligible
+    :initx/y: Inital x and y bounds
+    :incre: Amount to change bounds by when point above tol found, also
+    serves as spacing between points calculated along edges
+    :maxdepth: maximum times to increase bounds before determining to stop
+    :args: gamma and r factors
+    """    
+    # Create x and p vectors   
+    xvec = np.arange(initx[0], initx[1] + incre, step = incre)
+    yvec = np.arange(inity[0], inity[1] + incre, step = incre)
+    
+    # Initialise depth parameters
+    d1 = 0
+    d2 = 0
+    
+    # Need to re-evaluate if either vector is altered 
+    changed = True
+    while changed:
+        changed = False
+        
+        if d1 > maxdepth:
+            raise StopIteration('Max Depth reached, try increasing N or max depth')
+            
+        if d2 > maxdepth:
+            raise StopIteration('Max Depth reached, try increasing N or max depth')
+            
+        if (np.abs(func(args[0], args[1], xvec, yvec[0])) > tol).any():
+            yvec = np.insert(yvec, 0, yvec[0] - incre)
+            d1 = d1 + 1
+            changed = True
+
+        if (np.abs(func(args[0], args[1], xvec, yvec[-1])) > tol).any():
+            yvec = np.append(yvec, yvec[-1] + incre)
+            d1 = d1 + 1
+            changed = True
+
+        if (np.abs(func(args[0], args[1], xvec[0], yvec)) > tol).any():
+            xvec = np.insert(xvec, 0, xvec[0] - incre)
+            d2 = d2 + 1
+            changed = True
+
+        if (np.abs(func(args[0], args[1], xvec[-1], yvec)) > tol).any():
+            xvec = np.append(xvec, xvec[-1] + incre)
+            d2 = d2 + 1
+            changed = True
+
+    return [xvec[0], xvec[-1] + incre], [yvec[0], yvec[-1] + incre]    
+
 
 def simps2d(Xvec, Yvec, Z):
     """
-    Function to return value of the 2d simpson integration over a sample of values
-    :Xvec: first axis of values at which function is evaluated
-    :Yvec: second axis of values at which function is evaluated
+    Calculate the value of the 2d simpson integration over a sample of values.
+    :Xvec: First axis of values at which function is evaluated
+    :Yvec: Second axis of values at which function is evaluated
     :Z: Function values, first indice being X and second Y
     """
     return scipy.integrate.simps(scipy.integrate.simps(Z, Xvec), Yvec)
 
+# State Generating Functions
 
 def catstate(alpha, phi, theta, N):
+    """
+    Generate a 'Cat State' Qobj, defined as a superposition of coherent states.
+    :alpha: Argument of the coherent states
+    :phi: Amplitude (angular) parameter
+    :theta: Relative phase
+    :N: Number of fock states in Hilbert space
+    """
+    # Generate Coherent States
     coh1 = np.cos(phi) * coherent(N, alpha)
     coh2 = np.sin(phi) * cmath.rect(1,theta) * coherent(N, -alpha)
+    
+    # Calculate Normalisation Factor
     K = 1 + np.sin(2 * phi) * np.cos(theta) * np.exp(-2 * alpha * np.conj(alpha))
     norm = 1/np.sqrt(K)
+    
     return norm * (coh1 + coh2)
 
 
 def cubic(gamma, sqzf, N):
+    """
+    Generate a cubic phase state using a truncated fock space
+    :gamma: 'Cubicity' parameter
+    :sqzf: Squeezing factor on the state
+    :N: Number of fock states in Hilbert space
+    """
+    # Define position and momentum operators
     x = position(N)
-    cubeop = (1j * gamma * (x ** 3)).expm()
-    sqop = squeeze(N, sqzf)
+    p = momentum(N)
     
+    # Define 'Cubic' and Squeezing operators in terms of x and p
+    cubeop = (1j * gamma * (x ** 3)).expm()
+    sqop = (-(1j * sqzf / 2) * (x * p + p * x)).expm() 
+    
+    # Calculate the state by operating on the vacuum
     cubic = cubeop * sqop * basis(N,0)
     
     return cubic
 
 
 def innercubic(gamma, sqzf, N):
+    """
+    Generate an 'Inner' cubic phase state, similar to the cubic phase state but with 
+    modal operators cubed in the 'Cubic operator' term rather than the position.
+    :gamma: 'Cubicity' parameter
+    :sqzf: Squeezing factor on the state
+    :N: Number of fock states in Hilbert space
+    """
+    # Define the position and momentum operators
+    x = position(N)
+    p = momentum(N)
+    
+    # Define the cubic operator exponent
     exponent = (create(N) ** 3) + (destroy(N) ** 3)
     
+    # Define 'Cubic' and Squeezing operators 
     cubeop = (1j * gamma * exponent).expm()
-    sqop = squeeze(N, sqzf)
+    sqop = (-(1j * sqzf / 2) * (x * p + p * x)).expm() 
     
     icubic = cubeop * sqop * basis(N,0)
     
     return icubic
 
-def superposition(coeff, N):
-    # TODO
-    pass
+def wigcubic(gamma, r, X, P):
+    """
+    Calculate the value of the Wigner function for the cubic phase state from the 
+    expression given in arXiv:1809.05266.
+    :gamma: 'Cubicity' parameter
+    :r: Squeezing factor on the state
+    :X: Position coordinate (Real Coordinate)
+    :P: Momentum coordinate (Imaginary Coordinate)
+    """
+    # Create Grid from input X and P values
+    x,p = np.meshgrid(X,P)
+    
+    # Calculate Normalisation factor
+    N = np.exp(1 / (54 * (gamma ** 2) * np.exp(6 * r))) / (np.sqrt(np.pi) * np.exp(r)) * np.cbrt(4 / (3 * abs(gamma)))
+    
+    # Calcutate the argument of the Airy function at x and p
+    c= np.cbrt(4 / (3 * gamma))
+    airyarg = c * (3 * gamma * (x ** 2) - p + 1/(12 * gamma * np.exp(4 * r)))
+    
+    # Calculate the Wigner function
+    Wcube = N * np.exp(-p/ (3 * gamma * np.exp(2 * r))) * airy(airyarg)[0]
+    return Wcube
+
+def superposition(coeff):
+    """
+    Generate a Superposition of Fock states
+    :coeff: List of coefficients, (preferably normalised), number of coefficents
+    determines number of fock states in the Hilbert space
+    """
+    N = len(coeff) + 1
+    state = coeff[0] * basis(N,0)
+    
+    for i, x in enumerate(coeff[1:]):
+        state = state + x * fock(N,i)
+        
+    return state
