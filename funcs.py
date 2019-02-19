@@ -15,7 +15,8 @@ def myplotwigner(psi, xrange = [0,3], yrange = [-20,20], step = 0.1,
         title = 'A Wigner Function'):
     """
     Function for plotting the Wiger function of a state which gives more control
-    over the appearance of the graph than the built in qutip plot_wigner function.
+    over the appearance of the graph than the built in qutip plot_wigner
+    function.
     """
     # Generate X and Y values from inputs
     xvec = np.arange(xrange[0], xrange[1], step)
@@ -84,10 +85,10 @@ def my3dplot(X, Y, Z, title, axeslabels = ['x','y','z'], fineness = 50,
 def catstate(alpha, phi, theta, N):
     """
     Generate a 'Cat State' Qobj, defined as a superposition of coherent states.
-    :alpha: Argument of the coherent states
-    :phi: Amplitude (angular) parameter
-    :theta: Relative phase
-    :N: Number of fock states in Hilbert space
+    :alpha: Argument of the coherent states.
+    :phi: Amplitude (angular) parameter.
+    :theta: Relative phase.
+    :N: Number of fock states in Hilbert space.
     """
     # Generate Coherent States
     coh1 = np.cos(phi) * coherent(N, alpha)
@@ -106,10 +107,10 @@ def catstate(alpha, phi, theta, N):
 
 def cubic(gamma, sqzf, N):
     """
-    Generate a cubic phase state using a truncated fock space
-    :gamma: 'Cubicity' parameter
-    :sqzf: Squeezing factor on the state
-    :N: Number of fock states in Hilbert space
+    Generate a cubic phase state using a truncated fock space.
+    :gamma: 'Cubicity' parameter.
+    :sqzf: Squeezing factor on the state.
+    :N: Number of fock states in Hilbert space.
     """
     # Define position and momentum operators
     x = position(N)
@@ -128,11 +129,12 @@ def cubic(gamma, sqzf, N):
 
 def innercubic(gamma, sqzf, N):
     """
-    Generate an 'Inner' cubic phase state, similar to the cubic phase state but with
-    modal operators cubed in the 'Cubic operator' term rather than the position.
-    :gamma: 'Cubicity' parameter
-    :sqzf: Squeezing factor on the state
-    :N: Number of fock states in Hilbert space
+    Generate an 'Inner' cubic phase state, similar to the cubic phase state but
+    with modal operators cubed in the 'Cubic operator' term rather than the
+    position.
+    :gamma: 'Cubicity' parameter.
+    :sqzf: Squeezing factor on the state.
+    :N: Number of fock states in Hilbert space.
     """
     # Define the position and momentum operators
     x = position(N)
@@ -156,10 +158,10 @@ def wigcubic(X, P, gamma, r):
     """
     Calculate the value of the Wigner function for the cubic phase state from
     the expression given in arXiv:1809.05266.
-    :X: Position coordinate (Real Coordinate)
-    :P: Momentum coordinate (Imaginary Coordinate)
-    :gamma: 'Cubicity' parameter
-    :r: Squeezing factor on the state
+    :X: Position coordinate (Real Coordinate).
+    :P: Momentum coordinate (Imaginary Coordinate).
+    :gamma: 'Cubicity' parameter.
+    :r: Squeezing factor on the state.
     """
     # Create Grid from input X and P values
     x,p = np.meshgrid(X,P)
@@ -178,9 +180,9 @@ def wigcubic(X, P, gamma, r):
 
 def superposition(coeff):
     """
-    Generate a Superposition of Fock states
-    :coeff: List of coefficients, (preferably normalised), number of coefficents
-    determines number of fock states in the Hilbert space
+    Generate a Superposition of Fock states.
+    :coeff: List of coefficients, (preferably normalised), number of
+    coefficents determines number of fock states in the Hilbert space.
     """
     # Calculate size of space
     N = len(coeff) + 1
@@ -258,15 +260,17 @@ def boundfindwig(state, tol, initx = [-3, 3], inity = [-3, 3], incre = 0.5,
 def boundfindwigana(gamma, r, tol, initx = [-3, 3], inity = [-3, 3],
         incre = 0.5, maxdepth = 30 ):
     """
-    Rudimentary function for automatically finding bounds for a states wigner functionby looking at the value of the function along the edges of a grid and extendingthe grid until the values at the edges become below a tolerance.
-    :func: Analytical function for a states Wigner function
-    :tol: Value considered negligible
-    :gamma: 'Cubicity' parameter
-    :r: Squeezing factor on the state
-    :initx/y: Inital x and y bounds
+    Rudimentary function for automatically finding bounds for the cubic phase
+    state using the analytic function defined by 'wigcubic' by looking at the
+    value of the function along the edges of a grid and extendingthe grid until
+    the values at the edges become below a tolerance.
+    :tol: Value considered negligible.
+    :gamma: 'Cubicity' parameter.
+    :r: Squeezing factor on the state.
+    :initx/y: Inital x and y bounds.
     :incre: Amount to change bounds by when point above tol found, also
-    serves as spacing between points calculated along edges
-    :maxdepth: maximum times to increase bounds before determining to stop
+    serves as spacing between points calculated along edges.
+    :maxdepth: maximum times to increase bounds before determining to stop.
     """
     # Create x and p vectors
     xvec = np.arange(initx[0], initx[1] + incre, step = incre)
@@ -313,9 +317,9 @@ def boundfindwigana(gamma, r, tol, initx = [-3, 3], inity = [-3, 3],
 def simps2d(Xvec, Yvec, Z):
     """
     Calculate the value of the 2d simpson integration over a sample of values.
-    :Xvec: First axis of values at which function is evaluated
-    :Yvec: Second axis of values at which function is evaluated
-    :Z: Function values, first indice being X and second Y
+    :Xvec: First axis of values at which function is evaluated.
+    :Yvec: Second axis of values at which function is evaluated.
+    :Z: Function values, first indice being X and second Y.
     """
     return scipy.integrate.simps(scipy.integrate.simps(Z, Xvec), Yvec)
 
@@ -354,10 +358,19 @@ def wln(state, tol, xcount=400, ycount=400, initx=[-3, 3], inity=[-3, 3],
 
     return WLN, Wnorm, boundtime, calctime
 
+
 def wlnanalytic(gamma, r, tol,  xcount=800, ycount=800, initx=[-3, 3],
         inity=[-3, 3], incre=0.5, maxdepth=30):
     """
-
+    Calculate the normalisation and Wigner logarithmic negativity of the cubic
+    phase state using the analytic expression calculated by 'wigcubic'.
+    :gamma: 'Cubicity' parameter.
+    :r: Squeezing factor on the state.
+    :tol: Tolerance value for boundary finding.
+    :x/ycount: Number of points to take along x/y axis.
+    :initx/y: Inital x and y bounds.
+    :incre: Increment value for boundary finding.
+    :maxdepth: maximum times to increase bounds before determining to stop.
     """
     # Calculate boundaries for integration
     xbound, ybound = boundfindwigana(gamma, r, tol, initx, inity, incre,
