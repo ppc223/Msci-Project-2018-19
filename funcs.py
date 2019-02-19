@@ -152,14 +152,14 @@ def innercubic(gamma, sqzf, N):
     return cubic, nmean
 
 
-def wigcubic(gamma, r, X, P):
+def wigcubic(X, P, gamma, r):
     """
-    Calculate the value of the Wigner function for the cubic phase state from the
-    expression given in arXiv:1809.05266.
-    :gamma: 'Cubicity' parameter
-    :r: Squeezing factor on the state
+    Calculate the value of the Wigner function for the cubic phase state from
+    the expression given in arXiv:1809.05266.
     :X: Position coordinate (Real Coordinate)
     :P: Momentum coordinate (Imaginary Coordinate)
+    :gamma: 'Cubicity' parameter
+    :r: Squeezing factor on the state
     """
     # Create Grid from input X and P values
     x,p = np.meshgrid(X,P)
@@ -255,19 +255,18 @@ def boundfindwig(state, tol, initx = [-3, 3], inity = [-3, 3], incre = 0.5,
     return [xvec[0], xvec[-1] + incre], [yvec[0], yvec[-1] + incre]
 
 
-def boundfindcube(func, tol, initx = [-3, 3], inity = [-3, 3], incre = 0.5,
-        maxdepth = 30, args = ()):
+def boundfindwigana(gamma, r, tol, initx = [-3, 3], inity = [-3, 3],
+        incre = 0.5, maxdepth = 30 ):
     """
-    Rudimentary function for automatically finding bounds for a states wigner function
-    by looking at the value of the function along the edges of a grid and extending
-    the grid until the values at the edges become below a tolerance.
+    Rudimentary function for automatically finding bounds for a states wigner functionby looking at the value of the function along the edges of a grid and extendingthe grid until the values at the edges become below a tolerance.
     :func: Analytical function for a states Wigner function
     :tol: Value considered negligible
+    :gamma: 'Cubicity' parameter
+    :r: Squeezing factor on the state
     :initx/y: Inital x and y bounds
     :incre: Amount to change bounds by when point above tol found, also
     serves as spacing between points calculated along edges
     :maxdepth: maximum times to increase bounds before determining to stop
-    :args: gamma and r factors
     """
     # Create x and p vectors
     xvec = np.arange(initx[0], initx[1] + incre, step = incre)
@@ -288,22 +287,22 @@ def boundfindcube(func, tol, initx = [-3, 3], inity = [-3, 3], incre = 0.5,
         if d2 > maxdepth:
             raise StopIteration('Max Depth reached, try increasing N or max depth')
 
-        if (np.abs(func(args[0], args[1], xvec, yvec[0])) > tol).any():
+        if (np.abs(wigcubic(xvec, yvec[0], gamma, r)) > tol).any():
             yvec = np.insert(yvec, 0, yvec[0] - incre)
             d1 = d1 + 1
             changed = True
 
-        if (np.abs(func(args[0], args[1], xvec, yvec[-1])) > tol).any():
+        if (np.abs(wigcubic(xvec, yvec[-1], gamma, r)) > tol).any():
             yvec = np.append(yvec, yvec[-1] + incre)
             d1 = d1 + 1
             changed = True
 
-        if (np.abs(func(args[0], args[1], xvec[0], yvec)) > tol).any():
+        if (np.abs(wigcubic(xvec[0], yvec, gamma, r)) > tol).any():
             xvec = np.insert(xvec, 0, xvec[0] - incre)
             d2 = d2 + 1
             changed = True
 
-        if (np.abs(func(args[0], args[1], xvec[-1], yvec)) > tol).any():
+        if (np.abs(wigcubic(xvec[-1], yvec, gamma, r)) > tol).any():
             xvec = np.append(xvec, xvec[-1] + incre)
             d2 = d2 + 1
             changed = True
@@ -337,11 +336,11 @@ def wln(state, tol, xcount=400, ycount=400, initx=[-3, 3], inity=[-3, 3],
     boundtimestart = time.time()
     xbound, ybound = boundfindwig(state, tol, initx, inity, incre, maxdepth)
     boundtimeend = time.time()
-    boundtime = boundtimeend - boundtimeend
+    boundtime = boundtimeend - boundtimestart
 
     # Generate x and y vectors from calculated boundaries
-    xvec = np.linspace(x2bound[0], x2bound[-1], num = xcount)
-    yvec = np.linspace(y2bound[0], y2bound[-1], num = ycount)
+    xvec = np.linspace(xbound[0], xbound[1], num = xcount)
+    yvec = np.linspace(ybound[0], ybound[1], num = ycount)
 
     # record time to calculate the WLN
     calctimestart = time.time()
@@ -351,6 +350,26 @@ def wln(state, tol, xcount=400, ycount=400, initx=[-3, 3], inity=[-3, 3],
     Wnorm = simps2d(xvec, yvec, W)
     WLN = np.log2(simps2d(xvec, yvec, np.abs(W)))
     calctimeend = time.time()
-    calctime = calctimeend - calctimeend
+    calctime = calctimeend - calctimestart
 
     return WLN, Wnorm, boundtime, calctime
+
+def wlnanalytic(gamma, r, tol,  xcount=800, ycount=800, initx=[-3, 3],
+        inity=[-3, 3], incre=0.5, maxdepth=30):
+    """
+
+    """
+    # Calculate boundaries for integration
+    xbound, ybound = boundfindwigana(gamma, r, tol, initx, inity, incre,
+        maxdepth)
+
+    # Generate x and y vectors from calculated boundaries
+    xvec = np.linspace(xbound[0], xbound[1], num = xcount)
+    yvec = np.linspace(ybound[0], ybound[1], num = ycount)
+
+    # Calculate the Wigner function for the state
+    W = wigcubic(xvec, yvec, gamma, r)
+    # Calculate the normalisation of and WLN of the state
+    Wnorm = simps2d(xvec, yvec, W)
+    WLN = np.log2(simps2d(xvec, yvec, np.abs(W)))
+    return WLN, Wnorm
