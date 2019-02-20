@@ -360,7 +360,7 @@ def wln(state, tol, xcount=400, ycount=400, initx=[-3, 3], inity=[-3, 3],
 
 
 def wlnanalytic(gamma, r, tol,  xcount=800, ycount=800, initx=[-3, 3],
-        inity=[-3, 3], incre=0.5, maxdepth=30):
+        inity=[-3, 3], incre=0.5, maxdepth=80):
     """
     Calculate the normalisation and Wigner logarithmic negativity of the cubic
     phase state using the analytic expression calculated by 'wigcubic'.
