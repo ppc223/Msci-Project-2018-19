@@ -28,8 +28,8 @@ else:
         oldfile = datafile + '.old' + str(i)
 
         if not os.path.isfile(oldfile):
-            print('Moved old file to to' + oldfile)
-            os.path.rename(datafile, oldfile)
+            print('Moved old file to to ' + oldfile)
+            os.rename(datafile, oldfile)
             moved = True
 
     initoutput(datafile, columns)
