@@ -51,7 +51,8 @@ def myplotwigner(psi, xrange = [0,3], yrange = [-20,20], step = 0.1,
 def my3dplot(X, Y, Z, title, axeslabels = ['x','y','z'], fineness = 50,
         cmap = cm.jet):
     """
-    Function to plot an easily readable 3d visual of a set of input points.
+    Function to plot an easily readable 3d visual surface plot
+    of a set of input points.
     """
     x0 = X[0]
     y0 = Y[0]
@@ -79,6 +80,40 @@ def my3dplot(X, Y, Z, title, axeslabels = ['x','y','z'], fineness = 50,
     plt.title(title)
 
     return fig, ax
+
+
+def my3dscatter(X, Y, Z, title, axeslabels = ['x','y','z']):
+    """
+    Function to plot an easily readable 3d visual scatter plot
+    of a set of input points.
+    """
+    #x0 = X[0]
+    #y0 = Y[0]
+    # Generate X and Y values from inputs
+    #X, Y = np.meshgrid(X, Y)
+
+    # Create Figure and Axes for the plot
+    fig = plt.figure(figsize=(8,6))
+    ax = Axes3D(fig)
+
+    # plot surface
+    ax.scatter(X, Y, Z, c=Z, cmap=cm.jet)
+
+    # Overlay contours onto plot
+    # ax.contour(X, Y, Z, 10, zdir='x', offset=x0)
+    # ax.contour(X, Y, Z, 10, zdir='y', offset=y0)
+    # ax.contour(X, Y, Z, 20,zdir='z', offset=0)
+
+    # Label Axes appropriately
+    ax.set_xlabel(axeslabels[0])
+    ax.set_ylabel(axeslabels[1])
+    ax.set_zlabel(axeslabels[2])
+
+    # Add title
+    plt.title(title)
+
+    return fig, ax
+
 
 # State Generating Functions
 
@@ -226,11 +261,11 @@ def boundfindwig(state, tol, initx = [-3, 3], inity = [-3, 3], incre = 0.5,
     while changed:
         changed = False
 
-        if d1 > maxdepth:
-            raise StopIteration('Max Depth reached, try increasing N or max depth')
-
-        if d2 > maxdepth:
-            raise StopIteration('Max Depth reached, try increasing N or max depth')
+        # if d1 > maxdepth:
+        #     raise StopIteration('Max Depth reached, try increasing N or max depth')
+        #
+        # if d2 > maxdepth:
+        #     raise StopIteration('Max Depth reached, try increasing N or max depth')
 
         if (np.abs(wigner(state, xvec, yvec[0])) > tol).any():
             yvec = np.insert(yvec, 0, yvec[0] - incre)
@@ -285,11 +320,11 @@ def boundfindwigana(gamma, r, tol, initx = [-3, 3], inity = [-3, 3],
     while changed:
         changed = False
 
-        if d1 > maxdepth:
-            raise StopIteration('Max Depth reached, try increasing N or max depth')
-
-        if d2 > maxdepth:
-            raise StopIteration('Max Depth reached, try increasing N or max depth')
+        # if d1 > maxdepth:
+        #     raise StopIteration('Max Depth reached, try increasing N or max depth')
+        #
+        # if d2 > maxdepth:
+        #     raise StopIteration('Max Depth reached, try increasing N or max depth')
 
         if (np.abs(wigcubic(xvec, yvec[0], gamma, r)) > tol).any():
             yvec = np.insert(yvec, 0, yvec[0] - incre)
@@ -325,7 +360,7 @@ def simps2d(Xvec, Yvec, Z):
 
 
 def wln(state, tol, xcount=400, ycount=400, initx=[-3, 3], inity=[-3, 3],
-        incre=0.5, maxdepth=30):
+        incre=0.5, maxdepth=80):
     """
     Calculate the normalisation and Wigner logarithmic negativity of
     a Qobj input state.
@@ -386,3 +421,14 @@ def wlnanalytic(gamma, r, tol,  xcount=800, ycount=800, initx=[-3, 3],
     Wnorm = simps2d(xvec, yvec, W)
     WLN = np.log2(simps2d(xvec, yvec, np.abs(W)))
     return WLN, Wnorm, xbound, ybound
+
+# Misc Functions:
+
+def initoutput(datafile, columns):
+    """
+    Initialise an output csv file with given filename and
+    column heads (as a list)
+    """
+    dfinit = pd.DataFrame(columns=columns)
+    with open(datafile, 'a') as f:
+        dfinit.to_csv(f, index=False)
