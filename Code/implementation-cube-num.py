@@ -1,4 +1,5 @@
 import multiprocessing as mp
+import warnings
 import time
 import os
 
@@ -16,7 +17,7 @@ columns=['Wnorm', 'WLN', 'gamma', 'r', 'nmean', 'Ndim','xbound', 'xcount',
 # Name datafile for output and if not existing create and add column headings
 # if it does exist move the current file to a new file to avoid contaminating
 # either with bad data.
-datafile = 'cubicnumericaltest.csv'
+datafile = 'cubicnumerical.csv'
 if not os.path.isfile(datafile):
     initoutput(datafile, columns)
     print('File Created')
@@ -51,9 +52,8 @@ dN = []
 
 # Define the range parameters to iterate over and split into sections
 # to export data regularly so as to not lose any if the program fails
-splitcount = 2
-# range = np.concatenate((np.linspace(0.05,0.5,20), np.linspace(0.5,1,20)))
-range = np.linspace(0, 0.25, 4)
+splitcount = 10
+range = np.linspace(0, 1, 40)
 gammas = np.split(range, splitcount)
 rs = range
 
@@ -66,6 +66,8 @@ N = 150
 
 # Iterate over all parameters defined
 for ri, r in enumerate(rs):
+    # Set inital x and y bounds for boundary finding and reset each time
+    # we increment r
     initx = [-1, 1]
     inity = [-1, 1]
     for i in np.arange(0, len(gammas)):
@@ -75,11 +77,15 @@ for ri, r in enumerate(rs):
         #
         mask = np.ones(len(gammas[i]), dtype=bool)
         for k, gamma in enumerate(gammas[i]):
-            theta = np.arctan(r / gamma)
+            with warnings.catch_warnings():
+                warnings.filterwarnings('error')
+                try:
+                    theta = np.arctan(r / gamma)
+                except RuntimeWarning:
+                    theta = np.pi / 2
+            # Want results in half of the unit square described by right
+            # angled triangle with right angle cusped by the axes at 0, 0
             if gamma ** 2 + r ** 2 > (1/(np.cos(theta) - np.sin(theta))) ** 2:
-                mask[k] = False
-
-            if gamma < 0.5 and r < 0.5:
                 mask[k] = False
 
         gammas[i] = gammas[i][mask]
@@ -115,6 +121,7 @@ for ri, r in enumerate(rs):
             dycount.append(ycount)
             dN.append(N)
 
+            # update initial x and y to those found in the last loop
             initx = txbound
             inity = tybound
 
@@ -143,7 +150,7 @@ for ri, r in enumerate(rs):
             # Add some console output to see how the program is progressing
             # and if changes need to be made.
             print('exported data, progress = {:.4f} % in {:.4f} s'.format(
-                (ri / len(rs) + (i * percentstep) / len(gammas)) * 100,
+                (ri / len(rs) + ((i + 1) * percentstep) / len(gammas)) * 100,
                 time.time() - programstarttime))
 
 print('Finished in {} s'.format(time.time() - programstarttime))
