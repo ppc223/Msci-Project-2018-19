@@ -16,7 +16,7 @@ columns=['Wnorm', 'WLN', 'gamma', 'r', 'nmean', 'Ndim','xbound', 'xcount',
 # Name datafile for output and if not existing create and add column headings
 # if it does exist move the current file to a new file to avoid contaminating
 # either with bad data.
-datafile = 'cubicnumerical.csv'
+datafile = 'cubicnumericaltest.csv'
 if not os.path.isfile(datafile):
     initoutput(datafile, columns)
     print('File Created')
@@ -38,22 +38,22 @@ else:
 # Initialise data lists, Prefix them with d to easily differentiate them.
 dnorm = []
 dWLN = []
-dgamma = []
-dr = []
-dnmean = []
-# dN = []
-dxbound = []
-# dxcount = []
-dybound = []
-# dycount = []
 dtime1 = []
 dtime2 = []
+dxbound = []
+dybound = []
+dnmean = []
+dgamma = []
+dr = []
+dxcount = []
+dycount = []
+dN = []
 
 # Define the range parameters to iterate over and split into sections
 # to export data regularly so as to not lose any if the program fails
-splitcount = 8
-range = np.concatenate((np.linspace(0.05,0.5,20), np.linspace(0.5,1,20)))
-
+splitcount = 2
+# range = np.concatenate((np.linspace(0.05,0.5,20), np.linspace(0.5,1,20)))
+range = np.linspace(0, 0.25, 4)
 gammas = np.split(range, splitcount)
 rs = range
 
@@ -66,6 +66,8 @@ N = 150
 
 # Iterate over all parameters defined
 for ri, r in enumerate(rs):
+    initx = [-1, 1]
+    inity = [-1, 1]
     for i in np.arange(0, len(gammas)):
 
         # Set conditions here if only want some of the coordinates in the
@@ -82,48 +84,39 @@ for ri, r in enumerate(rs):
 
         gammas[i] = gammas[i][mask]
 
-        # Reset temporary arrays (used in parallel version to ensure correct
-        # values are associated to correct outputs)
+        # Reset (and initialise) list of states from previous loops
         states = []
-        tempgamma = []
-        tempnmean = []
 
         # Cacluate the states for each input parameter
-        results1 = [[cubic(gamma, r, N), gamma] for gamma in gammas[i]]
-
-        # Unpack the results
-        for result in results1:
-            states.append(result[0][0])
-            tempnmean.append(result[0][1])
-            tempgamma.append(result[1])
+        for k, gamma in enumerate(gammas[i]):
+            [tstates, tnmean], tgamma = cubic(gamma, r, N), gamma
+            # Store states and associated nmean and gamma values in a list,
+            # more useful if trying to parallelize the code
+            states.append([tstates,tnmean,tgamma])
 
         # Calcuate the Wigner Logarithmic Negativity (Mana) for each state along
         # with the Wigner functions norm and the boundaries calculated by the
         # automatic boundary finding algorithm
-
-        # TODO: Make it take last calculated boundaries as input until r
-        # changes
-        results2 = [[wln(state, 1e-5, xcount, ycount,
-            initx = [-8,8], inity = [-8,8], incre = 1, maxdepth = 300),
-            tempgamma[k], tempnmean[k]] for k, state in enumerate(states)]
-
-        # Unpack the WLN results
-        for result in results2:
-            dWLN.append(result[0][0])
-            dnorm.append(result[0][1])
-            dtime1.append(result[0][2])
-            dtime2.append(result[0][3])
-            dxbound.append(result[0][4])
-            dybound.append(result[0][5])
-            dgamma.append(result[1])
-            dnmean.append(result[2])
+        for k, state in enumerate(states):
+            [tWLN, tnorm, ttime1, ttime2, txbound, tybound], tnmean, tgamma = [
+                wln(state[0], 1e-5, xcount, ycount, initx, inity, 1, 300),
+                state[1], state[2]]
+            # Append data to associated lists
+            dWLN.append(tWLN)
+            dnorm.append(tnorm)
+            dtime1.append(ttime1)
+            dtime2.append(ttime2)
+            dxbound.append(txbound)
+            dybound.append(tybound)
+            dnmean.append(tnmean)
+            dgamma.append(tgamma)
             dr.append(r)
+            dxcount.append(xcount)
+            dycount.append(ycount)
+            dN.append(N)
 
-        # Set once at start of program but may change between runs so still
-        # to include these in data
-        dxcount = [xcount,] * len(dgamma)
-        dycount = [ycount,] * len(dgamma)
-        dN = [N,] * len(dgamma)
+            initx = txbound
+            inity = tybound
 
         # Zip lists together before outputing them to file
         data = list(zip(dnorm, dWLN, dgamma, dr, dnmean, dN, dxbound, dxcount,
@@ -137,15 +130,16 @@ for ri, r in enumerate(rs):
             df.to_csv(f, header=False, index=False)
             dnorm = []
             dWLN = []
-            dgamma = []
-            dr = []
-            dnmean = []
-            dxbound = []
-            dxcount = []
-            dybound = []
-            dycount = []
             dtime1 = []
             dtime2 = []
+            dxbound = []
+            dybound = []
+            dnmean = []
+            dgamma = []
+            dr = []
+            dxcount = []
+            dycount = []
+            dN = []
             # Add some console output to see how the program is progressing
             # and if changes need to be made.
             print('exported data, progress = {:.4f} % in {:.4f} s'.format(
