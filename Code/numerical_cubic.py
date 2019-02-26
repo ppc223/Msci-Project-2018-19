@@ -17,7 +17,7 @@ columns=['Wnorm', 'WLN', 'gamma', 'r', 'nmean', 'Ndim','xbound', 'xcount',
 # Name datafile for output and if not existing create and add column headings
 # if it does exist move the current file to a new file to avoid contaminating
 # either with bad data.
-datafile = 'cubicnumerical.csv'
+datafile = 'cubic.csv'
 if not os.path.isfile(datafile):
     initoutput(datafile, columns)
     print('File Created')
@@ -25,13 +25,13 @@ else:
     moved = False
     i = 1
     while not moved:
-        i = i + 1
         oldfile = datafile + '.old' + str(i)
 
         if not os.path.isfile(oldfile):
             print('Moved old file to to ' + oldfile)
             os.rename(datafile, oldfile)
             moved = True
+        i = i + 1
 
     initoutput(datafile, columns)
     print('File Created')
@@ -85,7 +85,7 @@ for ri, r in enumerate(rs):
                     theta = np.pi / 2
             # Want results in half of the unit square described by right
             # angled triangle with right angle cusped by the axes at 0, 0
-            if gamma ** 2 + r ** 2 > (1/(np.cos(theta) - np.sin(theta))) ** 2:
+            if gamma ** 2 + r ** 2 > (1/(np.cos(theta) + np.sin(theta))) ** 2:
                 mask[k] = False
 
         gammas[i] = gammas[i][mask]
