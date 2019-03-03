@@ -32,7 +32,7 @@ else:
             os.rename(datafile, oldfile)
             moved = True
         i = i + 1
-    
+
     initoutput(datafile, columns)
     print('File Created')
 
@@ -54,8 +54,8 @@ dN = []
 # to export data regularly so as to not lose any if the program fails
 splitcount = 10
 range = np.linspace(0, 1, 40)
-gammas = np.split(range, splitcount)
-rs = range
+gammas = np.split(range * 0.4, splitcount)
+rs = range * 2
 
 percentstep = 1 / len(rs)
 
@@ -68,27 +68,27 @@ N = 150
 for ri, r in enumerate(rs):
     # Set inital x and y bounds for boundary finding and reset each time
     # we increment r
-    initx = [-1, 1]
-    inity = [-1, 1]
+    initx = [-3, 3]
+    inity = [-3, 3]
     for i in np.arange(0, len(gammas)):
 
         # Set conditions here if only want some of the coordinates in the
         # defined ranges.
         #
-        mask = np.ones(len(gammas[i]), dtype=bool)
-        for k, gamma in enumerate(gammas[i]):
-            with warnings.catch_warnings():
-                warnings.filterwarnings('error')
-                try:
-                    theta = np.arctan(r / gamma)
-                except RuntimeWarning:
-                    theta = np.pi / 2
-            # Want results in half of the unit square described by right
-            # angled triangle with right angle cusped by the axes at 0, 0
-            if gamma ** 2 + r ** 2 > (1/(np.cos(theta) + np.sin(theta))) ** 2:
-                mask[k] = False
-
-        gammas[i] = gammas[i][mask]
+        # mask = np.ones(len(gammas[i]), dtype=bool)
+        # for k, gamma in enumerate(gammas[i]):
+        #     with warnings.catch_warnings():
+        #         warnings.filterwarnings('error')
+        #         try:
+        #             theta = np.arctan(r / gamma)
+        #         except RuntimeWarning:
+        #             theta = np.pi / 2
+        #     # Want results in half of the unit square described by right
+        #     # angled triangle with right angle cusped by the axes at 0, 0
+        #     if gamma ** 2 + r ** 2 > (1/(np.cos(theta) + np.sin(theta))) ** 2:
+        #         mask[k] = False
+        #
+        # gammas[i] = gammas[i][mask]
 
         # Reset (and initialise) list of states from previous loops
         states = []
