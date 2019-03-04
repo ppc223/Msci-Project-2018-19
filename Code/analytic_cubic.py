@@ -1,22 +1,39 @@
 import multiprocessing as mp
+import warnings
+import time
 import os
 
 import pandas as pd
 import numpy as np
-
 from funcs import *
 
+# Record time the program starts to see total runtime
+programstarttime = time.time()
+
 # Column Heads for data output
-columns=['Wnorm', 'WLN', 'gamma', 'r', 'xbound', 'xcount',
+columns=['Wnorm', 'WLN', 'gamma', 'r', 'nmean', 'Ndim','xbound', 'xcount',
     'ybound', 'ycount']
 
 # Name datafile for output and if not existing create and add column headings
 datafile = 'cubicanalytic.csv'
 if not os.path.isfile(datafile):
-    dfinit = pd.DataFrame(columns=columns)
-    with open(datafile, 'a') as f:
-        dfinit.to_csv(f, index=False)
+    initoutput(datafile, columns)
     print('File Created')
+else:
+    moved = False
+    i = 1
+    while not moved:
+        oldfile = datafile + '.old' + str(i)
+
+        if not os.path.isfile(oldfile):
+            print('Moved old file to to ' + oldfile)
+            os.rename(datafile, oldfile)
+            moved = True
+        i = i + 1
+
+    initoutput(datafile, columns)
+    print('File Created')
+
 
 # Initialise data lists
 dnorm = []
@@ -24,38 +41,55 @@ dWLN = []
 dgamma = []
 dr = []
 dxbound = []
-# dxcount = []
+dxcount = []
 dybound = []
-# dycount = []
-# dN = []
-# dtime1 = []
-# dtime2 = []
+dycount = []
+dN = []
+dnmean = []
 
-pool = mp.Pool(processes=8)
-
+# Define the range parameters to iterate over and split into sections
+# to export data regularly so as to not lose any if the program fails
 splitcount = 10
-gammas = np.split(np.linspace(0.1, 0.5, 20), splitcount)
-rs = np.linspace(0.1,0.5, 20)
+range = np.linspace(0.05, 2, 100)
+gammas = np.split(range, splitcount)
+rs = range
 
-xcount = ycount = 400
+percentstep = 1 / len(rs)
 
-for r in rs:
-    for i in range(0, len(gammas)):
-        results = [pool.apply(wlnanalytic, (gamma, r, 1e-5, xcount, ycount),
-            dict([])) for gamma in gammas[i]]
+# Define some parameters to pass to WLN calculating function
+xcount = ycount = 200
 
-        dgamma = dgamma + list(gammas[i])
-        dxcount = [xcount,] * len(dgamma)
-        dycount = [ycount,] * len(dgamma)
+N = 200
 
-        for result in results:
-            dWLN.append(result[0])
-            dnorm.append(result[1])
-            dxbound.append(result[2])
-            dybound.append(result[3])
+# Iterate over all parameters defined
+for ri, r in enumerate(rs):
+    # Set inital x and y bounds for boundary finding and reset each time
+    # we increment r
+    initx = [-3, 3]
+    inity = [-3, 3]
+    for i in np.arange(0, len(gammas)):
+        for k, gam in enumerate(gammas[i]):
+            tWLN, tnorm, txbound, tybound = wlnanalytic(gam, r, 1e-4, xcount,
+                ycount, initx, inity, 1, 300)
+
+            tnmean = cubic(gam, r, N)[1]
+            # Append data to associated lists
+            dWLN.append(tWLN)
+            dnorm.append(tnorm)
+            dxbound.append(txbound)
+            dybound.append(tybound)
+            dgamma.append(gam)
             dr.append(r)
+            dxcount.append(xcount)
+            dycount.append(ycount)
+            dN.append(N)
+            dnmean.append(tnmean)
 
-        data = list(zip(dnorm, dWLN, dgamma, dr, dxbound, dxcount,
+            # update initial x and y to those found in the last loop
+            initx = txbound
+            inity = tybound
+
+        data = list(zip(dnorm, dWLN, dgamma, dr, dnmean, dN, dxbound, dxcount,
             dybound, dycount))
 
         df = pd.DataFrame(data, columns=columns)
@@ -64,26 +98,18 @@ for r in rs:
             df.to_csv(f, header=False, index=False)
             dnorm = []
             dWLN = []
+            dxbound = []
+            dybound = []
             dgamma = []
             dr = []
-            dxbound = []
             dxcount = []
-            dybound = []
             dycount = []
-            print('exported data')
+            dN = []
+            dnmean = []
+            # Add some console output to see how the program is progressing
+            # and if changes need to be made.
+            print('exported data, progress = {:.4f} % in {:.4f} s'.format(
+                (ri / len(rs) + ((i + 1) * percentstep) / len(gammas)) * 100,
+                time.time() - programstarttime))
 
-
-
-# WLN, Wnorm, xbound, ybound = wlnanalytic(gamma, sqz, 1e-7)
-
-# columns=['Wnorm', 'WLN', 'gamma', 'r', 'xbound', 'xcount',
-#    'ybound', 'ycount', 'N', 'time1', 'time2']
-
-# data = list(zip(dnorm, dWLN, dgamma, dr, dxbound, dxcount, dybound, dxcount)
-# #,dN, dtime1, dtime2))
-#
-# df = pd.DataFrame(data, columns=columns)
-#
-# with open(datafile, 'a') as f:
-#     df.to_csv(f, header=False, index=False)
-#     written = True
+print('Finished in {} s'.format(time.time() - programstarttime))

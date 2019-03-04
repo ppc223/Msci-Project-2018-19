@@ -105,7 +105,7 @@ for ri, r in enumerate(rs):
         # automatic boundary finding algorithm
         for k, state in enumerate(states):
             [tWLN, tnorm, ttime1, ttime2, txbound, tybound], tnmean, tgamma = [
-                wln(state[0], 1e-5, xcount, ycount, initx, inity, 1, 300),
+                wln(state[0], 1e-4, xcount, ycount, initx, inity, 1, 300),
                 state[1], state[2]]
             # Append data to associated lists
             dWLN.append(tWLN)
