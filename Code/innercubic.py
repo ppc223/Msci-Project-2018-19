@@ -54,8 +54,8 @@ dN = []
 # to export data regularly so as to not lose any if the program fails
 splitcount = 10
 range = np.linspace(0, 1, 60)
-gammas = np.split(range * 0.3, splitcount)
-rs = range * 0.2
+gammas = np.split(range * 0.35, splitcount)
+rs = range * 0.15
 
 percentstep = 1 / len(rs)
 
