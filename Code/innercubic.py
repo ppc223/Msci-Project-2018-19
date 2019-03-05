@@ -55,7 +55,7 @@ dN = []
 splitcount = 10
 range = np.linspace(0, 1, 60)
 gammas = np.split(range * 0.3, splitcount)
-rs = range * 1.7
+rs = range * 0.2
 
 percentstep = 1 / len(rs)
 
