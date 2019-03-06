@@ -13,7 +13,7 @@ from qutip import *
 # Plotting Functions:
 
 def myplotwigner(psi, xrange = [0,3], yrange = [-20,20], step = 0.1,
-        title = 'A Wigner Function'):
+        title = 'A Wigner Function', fineness = 50):
     """
     Function for plotting the Wiger function of a state which gives more control
     over the appearance of the graph than the built in qutip plot_wigner
@@ -32,12 +32,13 @@ def myplotwigner(psi, xrange = [0,3], yrange = [-20,20], step = 0.1,
     ax = Axes3D(fig)
 
     # plot surface
-    ax.plot_surface(X, Y, W, rcount= 50, ccount= 50, cmap=cm.jet, alpha=.8)
+    ax.plot_surface(X, Y, W, rcount=fineness, ccount=fineness,
+        cmap=cm.jet, alpha=.8)
 
     # Overlay contours onto plot
-    ax.contour(X, Y, W, 10, zdir='x', offset=xrange[1])
-    ax.contour(X, Y, W, 10, zdir='y', offset=yrange[1])
-    ax.contour(X, Y, W, 20,zdir='z', offset=float(W.max() / 10))
+    # ax.contour(X, Y, W, 10, zdir='x', offset=xrange[1])
+    # ax.contour(X, Y, W, 10, zdir='y', offset=yrange[1])
+    # ax.contour(X, Y, W, 20,zdir='z', offset=float(W.max() / 10))
 
     # Label Axes appropriately
     ax.set_xlabel(r'$\rm{Re}(\alpha) \ / \ x$')
@@ -65,12 +66,12 @@ def my3dplot(X, Y, Z, title, axeslabels = ['x','y','z'], fineness = 50,
     ax = Axes3D(fig)
 
     # plot surface
-    ax.plot_surface(X, Y, Z, rcount= fineness, ccount= fineness, cmap=cm.jet, alpha=.8)
+    ax.plot_surface(X, Y, Z, rcount= fineness, ccount= fineness, cmap=cm.jet, alpha=.8, linewidth=0)
 
     # Overlay contours onto plot
-    ax.contour(X, Y, Z, 10, zdir='x', offset=x0)
-    ax.contour(X, Y, Z, 10, zdir='y', offset=y0)
-    ax.contour(X, Y, Z, 20,zdir='z', offset=0)
+    # ax.contour(X, Y, Z, 10, zdir='x', offset=x0)
+    # ax.contour(X, Y, Z, 10, zdir='y', offset=y0)
+    # ax.contour(X, Y, Z, 20,zdir='z', offset=0)
 
     # Label Axes appropriately
     ax.set_xlabel(axeslabels[0])

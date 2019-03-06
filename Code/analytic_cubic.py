@@ -51,8 +51,8 @@ dnmean = []
 # to export data regularly so as to not lose any if the program fails
 splitcount = 10
 range = np.linspace(0.05, 1, 100)
-gammas = np.split(range * 1.45, splitcount)
-rs = range * 0.25
+gammas = np.split(range * 0.25, splitcount)
+rs = range * 1.45
 
 percentstep = 1 / len(rs)
 
