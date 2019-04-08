@@ -12,8 +12,8 @@ from qutip import *
 
 # Plotting Functions:
 
-def myplotwigner(psi, xrange = [0,3], yrange = [-20,20], step = 0.1,
-        title = 'A Wigner Function', fineness = 50):
+def myplotwigner(psi, xrange = [-3,3], yrange = [-3,3], step = 0.1,
+        title = False, fineness = 50, fill = True, cont = False):
     """
     Function for plotting the Wiger function of a state which gives more control
     over the appearance of the graph than the built in qutip plot_wigner
@@ -36,17 +36,38 @@ def myplotwigner(psi, xrange = [0,3], yrange = [-20,20], step = 0.1,
         cmap=cm.jet, alpha=.8)
 
     # Overlay contours onto plot
-    # ax.contour(X, Y, W, 10, zdir='x', offset=xrange[1])
-    # ax.contour(X, Y, W, 10, zdir='y', offset=yrange[1])
-    # ax.contour(X, Y, W, 20,zdir='z', offset=float(W.max() / 10))
+    if cont
+        ax.contour(X, Y, W, 10, zdir='x', offset=xrange[1])
+        ax.contour(X, Y, W, 10, zdir='y', offset=yrange[1])
+        ax.contour(X, Y, W, 20,zdir='z', offset=float(W.max() / 10))
 
     # Label Axes appropriately
     ax.set_xlabel(r'$\rm{Re}(\alpha) \ / \ x$')
     ax.set_ylabel(r'$\rm{Im}(\alpha) \ / \ p$')
     ax.set_zlabel(r'$W_{\rho}(\alpha)$')
 
+    # Remove background grid
+    ax1.grid(False)
+
+    # Remove background fill
+    if not fill
+        ax1.xaxis.pane.fill = False
+        ax1.yaxis.pane.fill = False
+        ax1.zaxis.pane.fill = False
+
+    # Make pane around each axes black, adds a border to plot
+    ax1.xaxis.pane.set_edgecolor('black')
+    ax1.yaxis.pane.set_edgecolor('black')
+    ax1.zaxis.pane.set_edgecolor('black')
+
+    # Sets the pane borders to be closed squares, by default only 3 sides
+    ax1.xaxis.pane.set_closed(True)
+    ax1.yaxis.pane.set_closed(True)
+    ax1.zaxis.pane.set_closed(True)
+
     # Add title
-    plt.title(title)
+    if title:
+        plt.title(title)
     return fig, ax
 
 

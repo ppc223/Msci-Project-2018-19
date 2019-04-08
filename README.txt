@@ -19,3 +19,7 @@ states and generic calculation of the Mana
 
 Data-Analysis.ipynb - Notebook for analysis of the data.
 
+
+These aren't all fully commented to the degree I intend to submit them with but they do
+have a good amount of comments and any suggestions for where more are needed are welcome!
+
