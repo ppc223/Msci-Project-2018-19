@@ -36,7 +36,7 @@ def myplotwigner(psi, xrange = [-3,3], yrange = [-3,3], step = 0.1,
         cmap=cm.jet, alpha=.8)
 
     # Overlay contours onto plot
-    if cont
+    if cont:
         ax.contour(X, Y, W, 10, zdir='x', offset=xrange[1])
         ax.contour(X, Y, W, 10, zdir='y', offset=yrange[1])
         ax.contour(X, Y, W, 20,zdir='z', offset=float(W.max() / 10))
@@ -47,29 +47,28 @@ def myplotwigner(psi, xrange = [-3,3], yrange = [-3,3], step = 0.1,
     ax.set_zlabel(r'$W_{\rho}(\alpha)$')
 
     # Remove background grid
-    ax1.grid(False)
+    ax.grid(False)
 
     # Remove background fill
-    if not fill
-        ax1.xaxis.pane.fill = False
-        ax1.yaxis.pane.fill = False
-        ax1.zaxis.pane.fill = False
+    if not fill:
+        ax.xaxis.pane.fill = False
+        ax.yaxis.pane.fill = False
+        ax.zaxis.pane.fill = False
 
     # Make pane around each axes black, adds a border to plot
-    ax1.xaxis.pane.set_edgecolor('black')
-    ax1.yaxis.pane.set_edgecolor('black')
-    ax1.zaxis.pane.set_edgecolor('black')
+    ax.xaxis.pane.set_edgecolor('black')
+    ax.yaxis.pane.set_edgecolor('black')
+    ax.zaxis.pane.set_edgecolor('black')
 
     # Sets the pane borders to be closed squares, by default only 3 sides
-    ax1.xaxis.pane.set_closed(True)
-    ax1.yaxis.pane.set_closed(True)
-    ax1.zaxis.pane.set_closed(True)
+    ax.xaxis.pane.set_closed(True)
+    ax.yaxis.pane.set_closed(True)
+    ax.zaxis.pane.set_closed(True)
 
     # Add title
     if title:
         plt.title(title)
     return fig, ax
-
 
 def my3dplot(X, Y, Z, title, axeslabels = ['x','y','z'], fineness = 50,
         cmap = cm.jet):
