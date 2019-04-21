@@ -13,7 +13,7 @@ from qutip import *
 # Plotting Functions:
 
 def myplotwigner(psi, xrange = [-3,3], yrange = [-3,3], step = 0.1,
-        title, rccount = 50, fill = True, cont = False):
+        title='', rccount = 50, fill = True, cont = False):
     """
     Function for plotting the Wiger function of a state which gives more control
     over the appearance of the graph than the built in qutip plot_wigner
