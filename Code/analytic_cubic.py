@@ -15,7 +15,7 @@ columns=['Wnorm', 'WLN', 'gamma', 'r', 'nmean', 'Ndim','xbound', 'xcount',
     'ybound', 'ycount']
 
 # Name datafile for output and if not existing create and add column headings
-datafile = 'cubicanalytic.csv'
+datafile = 'data/cubicanalytic.csv'
 if not os.path.isfile(datafile):
     initoutput(datafile, columns)
     print('File Created')

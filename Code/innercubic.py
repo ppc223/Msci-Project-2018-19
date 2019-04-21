@@ -17,7 +17,7 @@ columns=['Wnorm', 'WLN', 'gamma', 'r', 'nmean', 'Ndim','xbound', 'xcount',
 # Name datafile for output and if not existing create and add column headings
 # if it does exist move the current file to a new file to avoid contaminating
 # either with bad data.
-datafile = 'inner_cubic.csv'
+datafile = 'data/inner_cubic.csv'
 if not os.path.isfile(datafile):
     initoutput(datafile, columns)
     print('File Created')
