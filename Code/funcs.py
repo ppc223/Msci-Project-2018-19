@@ -247,7 +247,7 @@ def my3dscatter(X, Y, Z, title, axeslabels = ['x','y','z'], cmap = cm.jet):
 
 
 def mycontourplot(X, Y, Z, title, axeslabels = ['q','p'],
-        cmap = cm.jet, levels = 50):
+        cmap = cm.jet, levels = 50, norm = None):
     """
     Function to plot an easily readable contour plot
     of a set of input points.
@@ -288,7 +288,7 @@ def mycontourplot(X, Y, Z, title, axeslabels = ['q','p'],
     ax = plt.axes()
 
     # plot Contour
-    cp = plt.contourf(X, Y, Z, levels = levels, cmap=cmap)
+    cp = plt.contourf(X, Y, Z, levels = levels, cmap=cmap, norm=norm)
     plt.colorbar(cp)
 
     # Label Axes appropriately
