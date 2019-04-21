@@ -681,22 +681,18 @@ def boundfindwigana(gamma, r, tol, initx = [-3, 3], inity = [-3, 3],
         changed = False
         if (np.abs(wigcubic(xvec, yvec[0], gamma, r)) > tol).any():
             yvec = np.insert(yvec, 0, yvec[0] - incre)
-            d1 = d1 + 1
             changed = True
 
         if (np.abs(wigcubic(xvec, yvec[-1], gamma, r)) > tol).any():
             yvec = np.append(yvec, yvec[-1] + incre)
-            d1 = d1 + 1
             changed = True
 
         if (np.abs(wigcubic(xvec[0], yvec, gamma, r)) > tol).any():
             xvec = np.insert(xvec, 0, xvec[0] - incre)
-            d2 = d2 + 1
             changed = True
 
         if (np.abs(wigcubic(xvec[-1], yvec, gamma, r)) > tol).any():
             xvec = np.append(xvec, xvec[-1] + incre)
-            d2 = d2 + 1
             changed = True
 
     return [xvec[0], xvec[-1]], [yvec[0], yvec[-1]]
