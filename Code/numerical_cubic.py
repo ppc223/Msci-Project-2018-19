@@ -72,24 +72,6 @@ for ri, r in enumerate(rs):
     inity = [-1, 1]
     for i in np.arange(0, len(gammas)):
 
-        # Set conditions here if only want some of the coordinates in the
-        # defined ranges.
-        #
-        # mask = np.ones(len(gammas[i]), dtype=bool)
-        # for k, gamma in enumerate(gammas[i]):
-        #     with warnings.catch_warnings():
-        #         warnings.filterwarnings('error')
-        #         try:
-        #             theta = np.arctan(r / gamma)
-        #         except RuntimeWarning:
-        #             theta = np.pi / 2
-        #     # Want results in half of the unit square described by right
-        #     # angled triangle with right angle cusped by the axes at 0, 0
-        #     if gamma ** 2 + r ** 2 > (1/(np.cos(theta) + np.sin(theta))) ** 2:
-        #         mask[k] = False
-        #
-        # gammas[i] = gammas[i][mask]
-
         # Reset (and initialise) list of states from previous loops
         states = []
 
