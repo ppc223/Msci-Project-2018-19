@@ -13,7 +13,8 @@ from qutip import *
 # Plotting Functions:
 
 def myplotwigner(psi, xrange = [-3,3], yrange = [-3,3], step = 0.1,
-        title='', rccount = 50, fill = True, cont = False):
+        title='', rccount = 50, fill = True, cont = False, cmap='jet',
+        color = None):
     """
     Function for plotting the Wiger function of a state which gives more control
     over the appearance of the graph than the built in qutip plot_wigner
@@ -70,16 +71,16 @@ def myplotwigner(psi, xrange = [-3,3], yrange = [-3,3], step = 0.1,
 
     # plot surface
     ax.plot_surface(X, Y, W, rcount=rccount, ccount=rccount,
-        cmap=cm.jet, alpha=.8)
+        cmap=cmap, alpha=.8, color=color)
 
     # Overlay contours onto plot
     if cont:
         ax.contour(X, Y, W, 10, zdir='x', offset=xrange[1])
         ax.contour(X, Y, W, 10, zdir='y', offset=yrange[1])
-        ax.contour(X, Y, W, 20, zdir='z', offset=float(W.max() / 10))
+        ax.contour(X, Y, W, 20, zdir='z', offset=0)
 
     # Label Axes appropriately
-    ax.set_xlabel(r'$\rm{Re}(\alpha) \ / \ x$')
+    ax.set_xlabel(r'$\rm{Re}(\alpha) \ / \ q$')
     ax.set_ylabel(r'$\rm{Im}(\alpha) \ / \ p$')
     ax.set_zlabel(r'$W_{\rho}(\alpha)$')
 
@@ -180,6 +181,15 @@ def my3dplot(X, Y, Z, title, axeslabels = ['x','y','z'], rccount = 50,
         ax.xaxis.pane.fill = False
         ax.yaxis.pane.fill = False
         ax.zaxis.pane.fill = False
+
+    # Make pane around each axes black, adds a border to plot
+    ax.xaxis.pane.set_edgecolor('black')
+    ax.yaxis.pane.set_edgecolor('black')
+    ax.zaxis.pane.set_edgecolor('black')
+    # Sets the pane borders to be closed squares, by default only 3 sides
+    ax.xaxis.pane.set_closed(True)
+    ax.yaxis.pane.set_closed(True)
+    ax.zaxis.pane.set_closed(True)
 
     # Add title
     plt.title(title)
