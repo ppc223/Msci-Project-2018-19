@@ -1,5 +1,8 @@
-import multiprocessing as mp
-import warnings
+"""
+This script generates Wigner logarithmic negativity and mean energy data for the cubic phase state at a grid of points in its generating parameter space.
+This is done using a semi-analytic solution to the Wigner function of the state.
+"""
+
 import time
 import os
 

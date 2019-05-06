@@ -728,7 +728,7 @@ def simps2d(Xvec, Yvec, Z):
     return scipy.integrate.simps(scipy.integrate.simps(Z, Xvec), Yvec)
 
 
-def wln(state, tol, xcount=400, ycount=400, initx=[-3, 3], inity=[-3, 3],
+def wln(state, tol, xcount=200, ycount=200, initx=[-3, 3], inity=[-3, 3],
         incre=0.5):
     """
     Calculate the normalisation of the Wigner function and the Wigner
